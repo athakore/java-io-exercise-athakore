@@ -3,6 +3,7 @@ import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.DataInputStream;
 import java.io.File;
+import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
@@ -18,20 +19,29 @@ public class Main {
 	public static void main(String[] args) {
 		InetAddress ip;
 		String fileName = "";
-		try {
-			ip = InetAddress.getLocalHost();
-			System.out.println("Current IP address : " + ip.getHostAddress());
-		} catch (UnknownHostException e) {
-			e.printStackTrace();
-		}
+		String line = "";
+//		try {
+//			ip = InetAddress.getLocalHost();
+//			System.out.println("Current IP address : " + ip.getHostAddress());
+//		} catch (UnknownHostException e) {
+//			e.printStackTrace();
+//		}
 		try (ServerSocket server = new ServerSocket(13337)) {
 			Socket client = server.accept();
 			System.out.println("Docking complete.");
 //			DataInputStream clientInput = new DataInputStream(client.getInputStream());
 			BufferedReader clientBuffer = new BufferedReader(new InputStreamReader(client.getInputStream()));
 			fileName = clientBuffer.readLine();
-			System.out.println(fileName);
-			createFile(fileName);
+			File f = new File(fileName +".txt");
+			if(f.exists())
+				System.out.println(fileName +".txt already exists!");
+			else
+				createFile(fileName);
+			BufferedWriter fileWriter = new BufferedWriter(new FileWriter(f));
+			while((line = clientBuffer.readLine()) != null) {
+				fileWriter.write(line);
+			}
+			fileWriter.close();
 		} catch (IOException e) {
 			System.out.println(e.getStackTrace());
 		}
